@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#060a10">
+<title>DOMINUS</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<!-- DOMINUS DE BOLSO (07/10/2026) - o Dominus do GOD TRADING no celular.
+     A pagina so desenha e fala: o cerebro e o PC do Ugor (dominus/dominus_bolso.py), alcancado por um tunel do
+     Cloudflare cuja URL fica em backend.json neste repositorio. Reconhecimento de voz: o do proprio navegador
+     (pt-BR). Resposta: texto + audio da mesma voz do PC + envelope da boca para o busto 3D (bolso3d.js). -->
+<style>
+:root{--c:#3ee6ff;--fundo:#060a10;--txt:#d7e6ee;--sub:#7f98a8;--amb:#ffb454;--erro:#ff6b6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--fundo);color:var(--txt);font:15px/1.4 system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden}
+body{display:flex;flex-direction:column;background:
+ radial-gradient(ellipse at 50% 30%,rgba(62,230,255,.10),transparent 60%),
+ repeating-linear-gradient(0deg,rgba(62,230,255,.035) 0 1px,transparent 1px 28px),
+ repeating-linear-gradient(90deg,rgba(62,230,255,.035) 0 1px,transparent 1px 28px),var(--fundo)}
+header{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top)) 16px 6px}
+header h1{margin:0;font-size:13px;letter-spacing:.35em;color:var(--c);font-weight:600}
+#pill{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--sub);display:flex;align-items:center;gap:6px}
+#pill i{width:8px;height:8px;border-radius:50%;background:#445;display:inline-block;box-shadow:0 0 8px transparent;transition:all .3s}
+#pill.ok i{background:var(--c);box-shadow:0 0 10px var(--c)}
+#pill.ouvindo i{background:var(--c);animation:p 1s infinite}
+#pill.pensando i{background:var(--amb);box-shadow:0 0 10px var(--amb);animation:p .6s infinite}
+#pill.falando i{background:var(--c);box-shadow:0 0 12px var(--c)}
+#pill.fora i{background:var(--erro);box-shadow:0 0 8px var(--erro)}
+@keyframes p{50%{opacity:.35}}
+#eng{background:none;border:0;color:var(--sub);font-size:18px;padding:4px 6px}
+.capa{position:relative;flex:1 1 auto;min-height:0;margin:0 8px}
+#av3d{width:100%;height:100%;display:block;filter:drop-shadow(0 0 10px rgba(62,230,255,.45)) drop-shadow(0 0 28px rgba(62,230,255,.18))}
+#anel{position:absolute;left:50%;top:50%;width:min(78vw,52vh);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+ border:1px solid rgba(62,230,255,.18);box-shadow:inset 0 0 40px rgba(62,230,255,.06);pointer-events:none}
+#anel::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:1px dashed rgba(62,230,255,.14);animation:gira 40s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+#conversa{flex:0 0 auto;max-height:34vh;overflow:auto;padding:4px 18px;display:flex;flex-direction:column;gap:8px;scrollbar-width:none}
+.msg{max-width:92%;padding:8px 12px;border-radius:14px;font-size:15px;white-space:pre-wrap}
+.eu{align-self:flex-end;background:rgba(62,230,255,.12);border:1px solid rgba(62,230,255,.25);border-bottom-right-radius:4px}
+.dom{align-self:flex-start;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:4px}
+.sis{align-self:center;color:var(--sub);font-size:12px;text-align:center}
+.sis.erro{color:var(--erro)}
+#barra{display:flex;align-items:center;gap:10px;padding:10px 14px calc(14px + env(safe-area-inset-bottom))}
+#txt{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(62,230,255,.2);color:var(--txt);border-radius:22px;padding:11px 16px;font-size:15px;outline:none;min-width:0}
+#txt:focus{border-color:var(--c)}
+#mic{width:64px;height:64px;border-radius:50%;border:2px solid var(--c);background:radial-gradient(circle at 50% 40%,rgba(62,230,255,.35),rgba(62,230,255,.08));color:var(--c);font-size:26px;display:grid;place-items:center;box-shadow:0 0 18px rgba(62,230,255,.35);flex:0 0 auto;transition:transform .15s}
+#mic:active{transform:scale(.94)}
+#mic.ouvindo{background:var(--c);color:#031018;animation:pulso 1.1s infinite}
+#mic.off{opacity:.35;border-color:var(--sub);box-shadow:none}
+@keyframes pulso{0%{box-shadow:0 0 0 0 rgba(62,230,255,.6)}100%{box-shadow:0 0 0 22px rgba(62,230,255,0)}}
+#parcial{position:absolute;left:0;right:0;bottom:6px;text-align:center;color:var(--c);font-size:14px;padding:0 16px;pointer-events:none;text-shadow:0 0 8px rgba(62,230,255,.6)}
+#cfg{position:fixed;inset:0;background:rgba(3,6,10,.92);display:none;flex-direction:column;gap:12px;padding:28px 22px;z-index:9}
+#cfg.on{display:flex}
+#cfg label{font-size:12px;letter-spacing:.1em;color:var(--sub);text-transform:uppercase}
+#cfg input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(62,230,255,.25);color:var(--txt);border-radius:10px;padding:12px 14px;font-size:16px}
+#cfg button{background:var(--c);color:#031018;border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:600}
+#cfg .sec{background:none;color:var(--sub);border:1px solid rgba(255,255,255,.15)}
+#cfg small{color:var(--sub);font-size:12px;line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+  <h1>DOMINUS</h1>
+  <div id="pill"><i></i><span>ligando</span></div>
+  <button id="eng" aria-label="configurações">⚙</button>
+</header>
+<div class="capa" id="capa"><div id="anel"></div><canvas id="av3d" aria-label="DOMINUS"></canvas><div id="parcial"></div></div>
+<div id="conversa"></div>
+<div id="barra">
+  <input id="txt" type="text" placeholder="ou escreva aqui…" autocomplete="off" enterkeyhint="send">
+  <button id="mic" aria-label="falar">🎙</button>
+</div>
+
+<div id="cfg">
+  <label>Token do Dominus (uma vez só)</label>
+  <input id="cfg-token" type="password" autocomplete="off" placeholder="o token que o PC gerou">
+  <label>Endereço do PC (automático pelo GitHub; só mude se souber)</label>
+  <input id="cfg-url" type="url" placeholder="https://xxxx.trycloudflare.com">
+  <button id="cfg-ok">Salvar</button>
+  <button id="cfg-fechar" class="sec">Fechar</button>
+  <small>O cérebro é o PC do Ugor. O PC precisa estar ligado com o DOMINUS-BOLSO.bat aberto. O endereço muda a cada
+  vez que o PC sobe e é lido automaticamente de backend.json neste repositório.<br><span id="cfg-info"></span></small>
+</div>
+
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/jsm/"}}</script>
+<script type="module" src="./bolso3d.js"></script>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const REPO = "ugororszagh-hub/dominus-bolso";
+const API_BACKEND = "https://api.github.com/repos/" + REPO + "/contents/backend.json";
+const RAW_BACKEND = "https://raw.githubusercontent.com/" + REPO + "/main/backend.json";
+const LS = { token: "dominus.token", url: "dominus.url" };
+const ls = { get: k => { try { return localStorage.getItem(k) || ""; } catch (_) { return ""; } }, set: (k, v) => { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (_) {} } };
+
+let URL_PC = ls.get(LS.url), TOKEN = ls.get(LS.token), ESTADO = "parado", noAr = false, ocupado = false, ouvindo = false;
+let ctx = null, fonteAtual = null, rec = null, silencioT = null;
+
+/* ---------- estado visual ---------- */
+function estado(e, txt) {
+  ESTADO = e;
+  const pill = $("pill"); pill.className = e === "parado" ? (noAr ? "ok" : "fora") : e;
+  pill.querySelector("span").textContent = txt || ({ parado: noAr ? "no ar" : "PC fora do ar", ouvindo: "ouvindo", pensando: "pensando", falando: "falando" }[e] || e);
+  if (window.DOMINUS_3D && e !== "falando") DOMINUS_3D.voz({ estado: e, nivel: 0 }, true);
+  $("mic").classList.toggle("ouvindo", e === "ouvindo");
+}
+function msg(cls, texto) {
+  const d = document.createElement("div"); d.className = "msg " + cls; d.textContent = texto; $("conversa").appendChild(d);
+  while ($("conversa").children.length > 12) $("conversa").firstChild.remove();
+  $("conversa").scrollTop = 1e9; return d;
+}
+const sis = (t, erro) => msg("sis" + (erro ? " erro" : ""), t);
+
+/* ---------- endereço do PC (backend.json no repositório) ---------- */
+async function descobrirUrl(forcar) {
+  if (ls.get(LS.url) && !forcar) { URL_PC = ls.get(LS.url); return URL_PC; }
+  for (const [u, h] of [[API_BACKEND, { Accept: "application/vnd.github.raw+json" }], [RAW_BACKEND + "?t=" + Date.now(), {}]]) {
+    try {
+      const r = await fetch(u, { headers: h, cache: "no-store" }); if (!r.ok) continue;
+      const j = await r.json(); if (j && j.url) { URL_PC = j.url.replace(/\/$/, ""); $("cfg-info").textContent = "backend.json: " + (j.atualizado || "") ; return URL_PC; }
+    } catch (_) {}
+  }
+  return URL_PC;
+}
+async function saude() {
+  if (!URL_PC) { await descobrirUrl(true); }
+  if (!URL_PC) { noAr = false; if (ESTADO === "parado") estado("parado"); return false; }
+  try {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 6000);
+    const r = await fetch(URL_PC + "/saude", { cache: "no-store", signal: ctl.signal }); clearTimeout(to);
+    const j = await r.json(); noAr = !!(j.ok && j.pronto);
+  } catch (_) { noAr = false; if (!ls.get(LS.url)) await descobrirUrl(true); }   // URL mudou? relê o backend.json
+  if (ESTADO === "parado") estado("parado");
+  return noAr;
+}
+
+/* ---------- áudio ---------- */
+function audioCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === "suspended") ctx.resume(); return ctx; }
+function b64buf(b64) { const s = atob(b64), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a.buffer; }
+async function tocar(r) {
+  const c = audioCtx();
+  const buf = await c.decodeAudioData(b64buf(r.audio_b64));
+  if (fonteAtual) { try { fonteAtual.stop(); } catch (_) {} }
+  const src = c.createBufferSource(); src.buffer = buf; src.connect(c.destination); fonteAtual = src;
+  const t0 = Date.now() / 1000 + (c.baseLatency || 0.02) + 0.05;
+  const fala = r.env ? { t0, dur: r.env.dur || buf.duration, texto: r.env.texto || r.resposta, env: r.env.env } : null;
+  estado("falando");
+  if (window.DOMINUS_3D) DOMINUS_3D.voz({ estado: "falando", fala }, true);
+  await new Promise(res => { src.onended = res; src.start(); });
+  fonteAtual = null;
+}
+
+/* ---------- perguntar ---------- */
+async function enviar(texto) {
+  texto = (texto || "").trim(); if (!texto || ocupado) return;
+  if (!TOKEN) { abrirCfg(); sis("Falta o token. Peça ao PC (está no .env como DOMINUS_BOLSO_TOKEN)."); return; }
+  if (!URL_PC) { await descobrirUrl(true); if (!URL_PC) { sis("Não achei o endereço do PC. O DOMINUS-BOLSO.bat está aberto?", true); return; } }
+  ocupado = true; msg("eu", texto); estado("pensando"); audioCtx();
+  try {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 70000);
+    const r = await fetch(URL_PC + "/perguntar", { method: "POST", headers: { "Content-Type": "application/json", "X-Dominus-Token": TOKEN }, body: JSON.stringify({ texto }), signal: ctl.signal });
+    clearTimeout(to);
+    const j = await r.json();
+    if (!j.ok) { sis(j.erro || "falha", true); if (r.status === 401) abrirCfg(); estado("parado"); return; }
+    msg("dom", j.resposta || "(sem resposta)");
+    if (j.audio_b64) await tocar(j);
+    estado("parado");
+    if (j.pergunta_final) setTimeout(() => { if (!ocupado) ouvir(); }, 250);   // ele perguntou: microfone abre sozinho
+  } catch (e) {
+    sis(e.name === "AbortError" ? "O PC não respondeu em 70 s." : "Sem contato com o PC: " + e.message, true);
+    noAr = false; estado("parado"); descobrirUrl(true);
+  } finally { ocupado = false; }
+}
+
+/* ---------- microfone: reconhecimento do próprio navegador (pt-BR) ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function ouvir() {
+  if (!SR) { sis("Este navegador não tem reconhecimento de voz. Use o Chrome, ou escreva.", true); return; }
+  if (ouvindo) { pararOuvir(); return; }
+  if (fonteAtual) { try { fonteAtual.stop(); } catch (_) {} }
+  audioCtx();
+  rec = new SR(); rec.lang = "pt-BR"; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+  let final = "";
+  rec.onstart = () => { ouvindo = true; estado("ouvindo"); $("parcial").textContent = ""; };
+  rec.onresult = ev => {
+    let parcial = "";
+    for (let i = ev.resultIndex; i < ev.results.length; i++) { const t = ev.results[i][0].transcript; if (ev.results[i].isFinal) final += t; else parcial += t; }
+    $("parcial").textContent = final || parcial;
+    clearTimeout(silencioT); silencioT = setTimeout(() => { try { rec.stop(); } catch (_) {} }, 1800);
+  };
+  rec.onerror = ev => { if (ev.error !== "no-speech" && ev.error !== "aborted") sis("microfone: " + ev.error, true); };
+  rec.onend = () => {
+    ouvindo = false; clearTimeout(silencioT); $("parcial").textContent = "";
+    if (ESTADO === "ouvindo") estado("parado");
+    const t = (final || $("parcial").textContent || "").trim(); if (t) enviar(t);
+  };
+  try { rec.start(); } catch (e) { sis("não consegui abrir o microfone: " + e.message, true); }
+}
+function pararOuvir() { try { rec && rec.stop(); } catch (_) {} }
+
+/* ---------- configurações ---------- */
+function abrirCfg() { $("cfg-token").value = TOKEN; $("cfg-url").value = ls.get(LS.url); $("cfg").classList.add("on"); }
+$("eng").onclick = abrirCfg;
+$("cfg-fechar").onclick = () => $("cfg").classList.remove("on");
+$("cfg-ok").onclick = async () => {
+  TOKEN = $("cfg-token").value.trim(); ls.set(LS.token, TOKEN);
+  const u = $("cfg-url").value.trim().replace(/\/$/, ""); ls.set(LS.url, u); URL_PC = u || "";
+  $("cfg").classList.remove("on"); await saude(); sis(noAr ? "PC no ar." : "PC fora do ar (ou endereço errado).", !noAr);
+};
+
+/* ---------- liga ---------- */
+$("mic").onclick = ouvir;
+$("txt").addEventListener("keydown", e => { if (e.key === "Enter") { const t = $("txt").value; $("txt").value = ""; enviar(t); } });
+if (!SR) $("mic").classList.add("off");
+estado("parado", "ligando");
+(async () => {
+  await descobrirUrl(false); await saude();
+  if (!TOKEN) { sis("Primeiro uso: toque na engrenagem e cole o token do PC."); }
+  else sis(noAr ? "Dominus no ar. Toque no microfone e fale." : "PC fora do ar. Abra o DOMINUS-BOLSO.bat no computador.", !noAr);
+  setInterval(saude, 20000);
+})();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>
